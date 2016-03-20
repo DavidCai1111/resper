@@ -21,6 +21,29 @@ describe('Resper test', () => {
     (() => Resper.decode(['jaja'])).should.throw(/should be an instance of Buffer/)
   })
 
+  it('Should get right data by events', () => {
+    let resper = new Resper()
+    let _err = new Error('heheda')
+    _err.name = 'Error'
+
+    resper.on('data', (data) => {
+      if (!Array.isArray(data)) {
+        [99, 199, 'jaja'].indexOf(data).should.not.eql(-1)
+      } else {
+        [1, 'str', null, _err].should.eql(data)
+      }
+    })
+    resper.buffer = Resper.encodeInt(99)
+    resper.write(Resper.encodeInt(199))
+    resper.write(Resper.encodeString('jaja'))
+    resper.end(Resper.encodeArray([
+      Resper.encodeInt(1),
+      Resper.encodeString('str'),
+      Resper.encodeNullArray(),
+      Resper.encodeError(new Error('heheda'))
+    ]))
+  })
+
   it('Should decode right', () => {
     Resper.decode(Resper.encodeString('jaja'))[0].should.eql('jaja')
 
@@ -85,5 +108,9 @@ describe('Resper test', () => {
         Resper.encodeError(new Error('heheda'))
       ]
     ]).toString().should.eql(`*3${CRLF}:1${CRLF}+str${CRLF}*2${CRLF}*-1${CRLF}-Error heheda${CRLF}`)
+  })
+
+  it('Should encode request right', () => {
+    Resper.encodeRequestArray(['LLEN', 'mylist']).toString().should.eql(`*2${CRLF}$4${CRLF}LLEN${CRLF}$6${CRLF}mylist${CRLF}`)
   })
 })
