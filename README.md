@@ -114,4 +114,6 @@ Emitted when no more data in instance's inner buffer.
 
 #### Event: finish
 
+`function () { }`
+
 Emitted when the `resper.end` was called.
